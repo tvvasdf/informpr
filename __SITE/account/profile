@@ -1,0 +1,68 @@
+<?php
+function print_profile($rating, $nickname){
+echo'
+    	<div class="column_two_section post_div">
+		<h1> Ваш профиль: </h1>
+        <h2>'.$nickname.' </h2>
+        <h2> У Вас права: ';
+switch ($rating){
+case 0: echo 'Обычного пользователя';
+break;
+
+case 1: echo 'Модератора';
+break;
+
+case 2: echo 'Администратора';
+break;
+
+case 3: echo 'Главного администратора';
+break;
+
+case 4: echo 'Разработчика проекта';
+break;
+
+case 5: echo 'Главного разработчика проекта';
+break;
+
+default: echo 'Ошибка';
+break;
+}
+echo '</h2>';
+
+
+if (($rating>0) and ($rating<4)){
+   echo ' <a class="btn panel" href="info-post"> Посмотреть информацию о записях </a>';
+} //модер(1), админ(2), гл.админ(3)
+
+if ($rating>3){ //разраб 4
+    echo '     <a class="btn panel" href="create-post"> Добавить новую запись </a>
+    <a class="btn panel" href="delete-post"> Посмотреть или удалить запись </a>';
+} 
+
+if ($rating>1){ //админ 2 
+   //echo '   <a class="btn panel" href="edit-post"> Править запись НЕ РАБОТАЕТ </a>';
+} 
+
+if ($rating>2){ //гл админ 3
+    
+    echo '
+    <a class="btn panel" href="manage"> Назначить модератора/администратора </a>'; //может назначать только модератора
+} 
+
+ if ($rating>4){ //гл разраб 5
+//может назначать модератора и администратора
+
+echo '
+    <a class="btn panel" href="site-copy"> Резервная копия сайта </a>'; //может назначать только модератора
+
+}
+
+if ($rating>0){
+    echo '   <a class="btn panel" href="info"> Справка </a>';
+} //модер 1
+
+echo '<form action="exit.php"> <button class="btn"> Выйти из уч. записи </button></form>
+        </div></div>';
+
+}
+?>

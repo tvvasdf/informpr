@@ -1,0 +1,29 @@
+<div id="content_column_two">
+    
+    	<div class="column_two_section post_div">
+			<h1><a href="http://www.templatemo.com" target="_parent">Web Design Template</a></h1>
+            <div class="post_info">
+            	Posted by <a href="http://www.templatemo.com" target="_parent">TemplateMo.com</a>, December 8, 2024 at 10:45 am, in <a href="#">Web Design</a></div>  
+	    <img src="images/image_01.jpg" alt="image" />
+            <p>This is a free CSS template provided by TemplateMo.com website. You may download, modify and apply this CSS layout for your personal or business websites.</p>
+            <p>Credit goes to <a href="http://www.photovaco.com" target="_blank">photovaco</a> for photos.</p>
+			<div class="post_comment">
+                <a href="#"><span class="comment">18 comments</span></a>
+            </div>        
+        </div>
+        
+        <div class="column_two_section post_div">
+			<h1><a href="http://www.templatemo.com" target="_parent">Free CSS Template</a></h1>
+            <div class="post_info">
+            	Posted by <a href="http://www.templatemo.com" target="_parent">Free Web Templates</a>, December 2, 2024 at 11:24 am, in <a href="#">Web Template</a></div>  
+	    <img src="images/image_02.jpg" alt="image" />
+            <p>Aliquam tristique lacus in sapien. Suspendisse potenti. Ut sed pede. Nullam vitae tellus. Sed ultrices. Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
+            <div class="post_comment">
+                <a href="#"><span class="comment">24 comments</span></a>
+            </div>        
+        </div>
+
+    </div> <!-- end of column two -->
+     
+    
+    <div class="cleaner">&nbsp;</div>

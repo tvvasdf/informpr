@@ -1,0 +1,19 @@
+<div id="header_panel">
+	<div id="header_section">
+    	<div id="title_section">Справочник</div>
+        <div id="tagline">по расходникам принтеров...</div>
+    </div>
+</div> <!-- end of haeder -->
+
+<div id="menu_panel">
+    <div id="menu_section">
+        <ul>
+            <li><a class="knopkaglav" href="/">Главная</a></li>
+            <li><a class="knopkaglav" href="/about-printers">О принтерах</a></li>
+            <li><a class="knopkaglav" href="/about-cartridges">О картриджах</a></li>            
+            <li><a class="knopkaglav" href="/feedback">Обратная связь</a></li> 
+            <li><a class="knopkaglav last" href="/account" >Личный кабинет</a></li>                     
+        </ul> 
+    </div>
+</div> <!-- end of menu -->
+
