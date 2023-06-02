@@ -6,19 +6,34 @@ class DBResult{
     private string $username;
     private string $database;
 
+    private string $dbConnPath = SITE_DIR . "init/dbconn.php";
+    private string $dbFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
+
     public mysqli_result $result;
 
-    private string $dbConnPath = SITE_DIR . "init/dbconn.php";
     function __construct()
     {
+        if (file_exists($this->dbFuncCheckKeys)){
+            require $this->dbFuncCheckKeys;
+        } else {
+            echo "Class DBResult - Ошибка: Отсутствует файл " . $this->dbFuncCheckKeys;
+        }
+
         if (file_exists($this->dbConnPath)){
             require $this->dbConnPath;
         } else {
-            echo "Ошибка: Отсутствует файл " . $this->dbConnPath;
+            echo "Class DBResult - Ошибка: Отсутствует файл " . $this->dbConnPath;
         }
 
-        if (!$dbConnData or !$this->checkDBConnData($dbConnData)){
-            echo "Ошибка: Файл " . $this->dbConnPath . " отсутствует или поврежден";
+        $needleKeys = [
+            'hostname',
+            'username',
+            'password',
+            'database',
+        ];
+
+        if (!$dbConnData or checkKeysInArr($dbConnData, $needleKeys)){
+            echo "Class DBResult - Ошибка: Файл " . $this->dbConnPath . " отсутствует или поврежден";
         } else {
             $this->hostname = $dbConnData['hostname'];
             $this->username = $dbConnData['username'];
@@ -89,36 +104,7 @@ class DBResult{
                 break;
         }
     }
-/*
- * mysqli_result::fetch_all — Выбирает все строки из результирующего набора и помещает их в ассоциативный массив, обычный массив или в оба
-mysqli_result::fetch_array — Выбирает следующую строку из набора результатов и помещает её в ассоциативный массив, обычный массив или в оба
-mysqli_result::fetch_assoc — Выбирает следующую строку из набора результатов и помещает её в ассоциативный массив
-mysqli_result::fetch_column — Получает один столбец из следующей строки набора результатов
-mysqli_result::fetch_field_direct — Получение метаданных конкретного поля
-mysqli_result::fetch_field — Возвращает следующее поле результирующего набора
-mysqli_result::fetch_fields — Возвращает массив объектов, представляющих поля результирующего набора
-mysqli_result::fetch_object — Выбирает следующую строку из набора результатов в виде объекта
-mysqli_result::fetch_row
- */
-    private function checkDBConnData(array $array):bool
-    {
-        $needleArrKeys = [
-            "hostname",
-            "password",
-            "username",
-            "database",
-        ];
-        foreach ($needleArrKeys as $key){
-            if (!array_key_exists($key, $array)) return false;
-        }
-
-        return true;
-    }
-
-
-
 }
-
 
 /*
             SELECT ('столбцы или * для выбора всех столбцов; обязательно')

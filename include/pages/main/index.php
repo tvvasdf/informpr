@@ -1,18 +1,18 @@
 <?php
 
-include SITE_DIR . 'func/DBResult.php';
+include SITE_DIR . 'func/MenuAction.php';
 
-$param = [
-    'select' => '*',
-    'from' => 'testTable',
+
+$test = new Menu('top');
+$new = [
+    'ID' => '2',
+    'NAME' => 'TEST',
+    'URL' => 'TEST',
+    'CATEGORY' => 'ORIGINAL',
+    'DEPTH_LEVEL' => '1',
 ];
 
-$test = new DBResult();
-
-$dbRes = $test->GetList($param);
-
-
-
 echo '<pre>';
-var_dump($dbRes);
+var_dump($test->includeComponent());
 echo '</pre>';
+
