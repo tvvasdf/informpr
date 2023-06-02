@@ -6,6 +6,8 @@ class DBResult{
     private string $username;
     private string $database;
 
+    public mysqli_result $result;
+
     private string $dbConnPath = SITE_DIR . "init/dbconn.php";
     function __construct()
     {
@@ -48,7 +50,7 @@ class DBResult{
 
         $resultMode = $params['RESULT_MODE'];
 
-        if ($select = "*") $query = "SELECT " . $select . " FROM `" . $from . "`";
+        if ($select == "*") $query = "SELECT " . $select . " FROM `" . $from . "`";
         else $query = "SELECT `" . $select . "` FROM `" . $from . "`";
 
         if ($where)
@@ -61,12 +63,43 @@ class DBResult{
             $query=+" ORDER BY `" . $orderBy . "`";
 
         $query = mysqli_real_escape_string($mysqli, $query);
+        $this->result = mysqli_query($mysqli, $query, $resultMode);
 
-        return mysqli_query($mysqli, $query, $resultMode);
+        return $this->result;
         //return $query;
     }
 
+    public function Fetch(string $fetch = "all")
+    {
+        switch ($fetch){
+            case "all":
+                mysqli_fetch_all($this->result);
+                break;
 
+            case "array":
+                mysqli_fetch_array($this->result);
+                break;
+
+            case "assoc":
+                mysqli_fetch_assoc($this->result);
+                break;
+
+            case "row":
+                mysqli_fetch_row($this->result);
+                break;
+        }
+    }
+/*
+ * mysqli_result::fetch_all — Выбирает все строки из результирующего набора и помещает их в ассоциативный массив, обычный массив или в оба
+mysqli_result::fetch_array — Выбирает следующую строку из набора результатов и помещает её в ассоциативный массив, обычный массив или в оба
+mysqli_result::fetch_assoc — Выбирает следующую строку из набора результатов и помещает её в ассоциативный массив
+mysqli_result::fetch_column — Получает один столбец из следующей строки набора результатов
+mysqli_result::fetch_field_direct — Получение метаданных конкретного поля
+mysqli_result::fetch_field — Возвращает следующее поле результирующего набора
+mysqli_result::fetch_fields — Возвращает массив объектов, представляющих поля результирующего набора
+mysqli_result::fetch_object — Выбирает следующую строку из набора результатов в виде объекта
+mysqli_result::fetch_row
+ */
     private function checkDBConnData(array $array):bool
     {
         $needleArrKeys = [
