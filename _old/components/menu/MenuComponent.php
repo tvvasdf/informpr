@@ -3,6 +3,7 @@
 class Menu{
 
     private string $menuFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
+    private string $pathToMenuTypes = SITE_DIR . 'components_data/menu/menu_types.json';
     private array $needleKeys = [
         'ID',
         'NAME',
@@ -16,13 +17,18 @@ class Menu{
 
     function __construct (string $menuComponent)
     {
-        if (file_exists(SITE_DIR . 'components/menu/' . $menuComponent .'/index.php')){
-            $this->menuComponent = $menuComponent;
-            $this->filePath = SITE_DIR . 'components_data/menu/' . $menuComponent .'/data.json';
-            echo 'такой компонент существует';
+        if (file_exists($this->pathToMenuTypes) and $file = file_get_contents($this->pathToMenuTypes)){
+            $arMenuTypes = json_decode($file, true);
+            if (in_array($menuComponent, $arMenuTypes)){
+                $this->menuComponent = $menuComponent;
+                $this->filePath = SITE_DIR . 'components_data/menu/' . $menuComponent .'/data.json';
+            } else {
+                echo 'Class Menu - Такого типа меню не существует!';
+            }
         } else {
-            echo 'такого компонента нету!!!';
+            echo 'Class Menu - Отсутствует файл с типами меню! (' . SITE_DIR . 'components_data/menu/menu_types.json)';
         }
+
     }
 
     function addItem(array $newItem):bool
@@ -34,12 +40,16 @@ class Menu{
         }
 
         if ($file = file_get_contents($this->filePath)){
-            $arrMenu = json_decode($file, true);
-            $arrMenu[] = $newItem;
-        } else {
-            $arrMenu[] = $newItem;
+            $arMenu = json_decode($file, true);
         }
-        return $this->putData($arrMenu, $this->filePath);
+
+        foreach ($arMenu as $arItem){
+            if ($arItem['ID'] == $newItem['ID']){
+                return false;
+            }
+        }
+        $arMenu[] = $newItem;
+        return $this->putData($arMenu, $this->filePath);
 
     }
 
@@ -47,12 +57,14 @@ class Menu{
     {
 
         $this->init();
+        $itemDeleted = false;
 
         if ($file = file_get_contents($this->filePath)){
-            $arrMenu = json_decode($file);
-            foreach ($arrMenu as $key => $item){
+            $arMenu = json_decode($file, true);
+            foreach ($arMenu as $key => $item){
                 if ($item['ID'] == $removeId){
-                    unset ($arrMenu[$key]);
+                    unset ($arMenu[$key]);
+                    $itemDeleted = true;
                     break;
                 }
             }
@@ -60,7 +72,9 @@ class Menu{
             return false;
         }
 
-        return $this->putData($arrMenu, $this->filePath);
+        if (!$itemDeleted) return false;
+
+        return $this->putData($arMenu, $this->filePath);
 
     }
 
@@ -68,15 +82,25 @@ class Menu{
     {
         $this->init();
 
-        if (checkKeysInArr($updateItem, $this->needleKeys)) {
+        $needle = $this->needleKeys;
+
+        foreach ($needle as $key => $item){
+            if ($item == 'ID'){
+                unset ($needle[$key]);
+                break;
+            }
+        }
+
+        if (!checkKeysInArr($updateItem, $needle)) {
             return false;
         }
 
         if ($file = file_get_contents($this->filePath)){
-            $arrMenu = json_decode($file);
-            foreach ($arrMenu as $key => $item){
+            $arMenu = json_decode($file, true);
+            foreach ($arMenu as $key => $item){
                 if ($item['ID'] == $updateId){
-                    $arrMenu[$key] = $updateItem;
+                    $updateItem['ID'] = $item['ID'];
+                    $arMenu[$key] = $updateItem;
                     break;
                 }
             }
@@ -84,7 +108,7 @@ class Menu{
             return false;
         }
 
-        return $this->putData($arrMenu, $this->filePath);
+        return $this->putData($arMenu, $this->filePath);
 
     }
 
@@ -95,6 +119,18 @@ class Menu{
         } else {
             return false;
         }
+    }
+
+    function addMenuType()
+    {
+        $this->init();
+        $needle = ['MENU_TYPE', 'ID'];
+        if ($file = file_get_contents($this->pathToMenuTypes)) {
+            $arMenuTypes =  json_decode($file, true);
+        } else {
+            return false;
+        }
+        $this->menuComponent;
     }
 
     private function init()
@@ -108,7 +144,7 @@ class Menu{
         }
     }
 
-    private function putData(array $array, string $path)
+    private function putData(array $array, string $path):bool
     {
         $data = json_encode($array);
 
@@ -133,7 +169,7 @@ class Menu{
             mkdir(SITE_DIR . 'components_data/menu');
         }
 
-        if (!is_dir(SITE_DIR . 'components_data/menu' . $this->menuComponent)){
+        if (!is_dir(SITE_DIR . 'components_data/menu/' . $this->menuComponent)){
             mkdir(SITE_DIR . 'components_data/menu/' . $this->menuComponent);
         }
     }

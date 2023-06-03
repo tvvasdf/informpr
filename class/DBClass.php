@@ -1,28 +1,30 @@
 <?php
 
-class DBResult{
-    private string $hostname;
-    private string $password;
-    private string $username;
-    private string $database;
+class DB{
 
-    private string $dbConnPath = SITE_DIR . "init/dbconn.php";
-    private string $dbFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
+    private static string $username;
+    private static string $password;
+    private static string $database;
+    private static string $hostname;
 
-    public mysqli_result $result;
 
-    function __construct()
+    private static string $dbConnPath = SITE_DIR . "init/dbconn.php";
+    private static string $dbFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
+
+    public static mysqli_result $result;
+
+    private static function AuthorizeDB()
     {
-        if (file_exists($this->dbFuncCheckKeys)){
-            require $this->dbFuncCheckKeys;
+        if (file_exists(self::$dbFuncCheckKeys)){
+            require self::$dbFuncCheckKeys;
         } else {
-            echo "Class DBResult - Ошибка: Отсутствует файл " . $this->dbFuncCheckKeys;
+            echo "Class DBResult - Ошибка: Отсутствует файл " . self::$dbFuncCheckKeys;
         }
 
-        if (file_exists($this->dbConnPath)){
-            require $this->dbConnPath;
+        if (file_exists(self::$dbConnPath)){
+            require self::$dbConnPath;
         } else {
-            echo "Class DBResult - Ошибка: Отсутствует файл " . $this->dbConnPath;
+            echo "Class DBResult - Ошибка: Отсутствует файл " . self::$dbConnPath;
         }
 
         $needleKeys = [
@@ -32,25 +34,29 @@ class DBResult{
             'database',
         ];
 
-        if (!$dbConnData or checkKeysInArr($dbConnData, $needleKeys)){
-            echo "Class DBResult - Ошибка: Файл " . $this->dbConnPath . " отсутствует или поврежден";
+        if (!$dbConnData or !checkKeysInArr($dbConnData, $needleKeys)){
+            echo "Class DBResult - Ошибка: Файл " . self::$dbConnPath . " отсутствует или поврежден";
+            return false;
         } else {
-            $this->hostname = $dbConnData['hostname'];
-            $this->username = $dbConnData['username'];
-            $this->password = $dbConnData['password'];
-            $this->database = $dbConnData['database'];
+            self::$hostname = $dbConnData['hostname'];
+            self::$username = $dbConnData['username'];
+            self::$password = $dbConnData['password'];
+            self::$database = $dbConnData['database'];
+            return true;
         }
     }
 
-    private function mysqliConn()
+    public static function GetList(array $params)
     {
-        return mysqli_connect($this->hostname, $this->username, $this->password, $this->database);
-    }
+        if (!self::AuthorizeDB()){
+            return false;
+        }
 
-    public function GetList(array $params)
-    {
-        $mysqli = $this->mysqliConn();
+        $mysqli = mysqli_connect(self::$hostname, self::$username, self::$password, self::$database);
 
+        if (!$mysqli){
+            return false;
+        }
         //обязательные
 
         $select = $params['select'];
@@ -78,29 +84,28 @@ class DBResult{
             $query=+" ORDER BY `" . $orderBy . "`";
 
         $query = mysqli_real_escape_string($mysqli, $query);
-        $this->result = mysqli_query($mysqli, $query, $resultMode);
-
-        return $this->result;
+        self::$result = mysqli_query($mysqli, $query, $resultMode);
+        return self::$result;
         //return $query;
     }
 
-    public function Fetch(string $fetch = "all")
+    public static function Fetch(string $fetch = "all")
     {
         switch ($fetch){
             case "all":
-                mysqli_fetch_all($this->result);
+                mysqli_fetch_all(self::$result);
                 break;
 
             case "array":
-                mysqli_fetch_array($this->result);
+                mysqli_fetch_array(self::$result);
                 break;
 
             case "assoc":
-                mysqli_fetch_assoc($this->result);
+                mysqli_fetch_assoc(self::$result);
                 break;
 
             case "row":
-                mysqli_fetch_row($this->result);
+                mysqli_fetch_row(self::$result);
                 break;
         }
     }
