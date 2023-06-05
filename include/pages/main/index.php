@@ -25,7 +25,18 @@ $get = [
         'cond' => '=',
         'value' => '3',
     ],
+];
 
+$delete = [
+    'where' => [
+        'field' => 'DEPTH_LEVEL',
+        'cond' => '=',
+        'value' => '3',
+    ],
+];
+
+$needle = [
+    'where'
 ];
 
 /*
@@ -36,7 +47,11 @@ var_dump($test);
 echo '</pre>';
 */
 
-
+$test = DB::DeleteItem($delete,'testTable', $needle);
+echo '<pre>';
+var_dump($test);
+echo '</pre>';
+/*
 $test = DB::GetList($get, 'testTable');
 
 echo '<pre>';

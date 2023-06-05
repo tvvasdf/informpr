@@ -75,8 +75,6 @@ class DB{
         $having = $params['having'];
         $orderBy = $params['orderBy'];
 
-        $resultMode = $params['RESULT_MODE'];
-
         if ($select == "*") $query = "SELECT " . $select . " FROM `" . $from . "`";
         else $query = "SELECT `" . $select . "` FROM `" . $from . "`";
 
@@ -110,20 +108,9 @@ class DB{
         //return $query;
     }
 
-    public static function AddItem(array $params, string $inTable)
+    public static function AddItem(array $params, string $fromTable, array $needle)
     {
-        if (!self::AuthorizeDB()){
-            return false;
-        }
-
-        $needle = [
-            'NAME',
-            'CATEGORY',
-            'DEPTH_LEVEL',
-            'URL',
-        ];
-
-        if (!checkKeysInArr($params, $needle)){
+        if (!self::AuthorizeDB() or !checkKeysInArr($params, $needle)){
             return false;
         }
 
@@ -144,10 +131,61 @@ class DB{
                 $listVals[] = "'" . $value . "'";
             }
         }
-        $query = "INSERT INTO `" . $inTable . "`(" . implode(", ", $listKeys) . ") VALUES (" . implode(", ", $listVals) . ");";
+        $query = "INSERT INTO `" . $fromTable . "`(" . implode(", ", $listKeys) . ") VALUES (" . implode(", ", $listVals) . ");";
 
         return self::SendQuery($query);
         //return $query;
+    }
+
+    public static function DeleteItem(array $params, string $fromTable, array $needle = ["where"])
+    {
+        if (!self::AuthorizeDB() or !checkKeysInArr($params, $needle)){
+            return false;
+        }
+        //обязательные
+        $where = $params['where'];
+
+        $query = "DELETE FROM `" . $fromTable . "` WHERE ";
+
+        if (is_array($where['cond1']) and count($where) > 1){
+            $where = array_unique($where, SORT_REGULAR);
+            $query = $query . "(";
+            foreach ($where as $cond){
+                $query = $query . "`" . $cond['field'] . "`" . $cond['cond'] . $cond['value'];
+                if ($cond != end($where)){
+                    if (!$cond['nextCond']) $cond['nextCond'] = "AND";
+                    $query = $query . " " . $cond['nextCond'] . " ";
+                } else {
+                    $query = $query . ")";
+                }
+            }
+
+        } elseif (is_array($where)) {
+            $query = $query . "`" . $where['field'] . "` " . $where['cond'] . $where['value'];
+        } else {
+            return false;
+        }
+
+        return self::SendQuery($query);
+        //return $query;
+    }
+
+    public static function UpdateItem(array $params, string $fromTable, array $needle = ["update", "where"])
+    {
+        if (!self::AuthorizeDB() or !checkKeysInArr($params, $needle)){
+            return false;
+        }
+        $query = "UPDATE `" . $fromTable . "` SET ";
+        $update = $params['update'];
+        $where = $params['where'];
+        foreach ($update as $key => $value){
+            $query = $query . "`" . $key . "`=" . $value;
+            if ($value != end($params['update'])) {
+                $query = $query . ", ";
+            }
+        }
+
+        return self::SendQuery($query);
     }
 
 }
