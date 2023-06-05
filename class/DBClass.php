@@ -1,22 +1,18 @@
 <?php
-
 class DB{
 
-    private static string $username;
-    private static string $password;
-    private static string $database;
-    private static string $hostname;
-
+    private static $pdo;
 
     private static string $dbConnPath = SITE_DIR . "init/dbconn.php";
     private static string $dbFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
 
-    public static mysqli_result $result;
+    //PDOStatement or bool
+    public static $result;
 
     private static function AuthorizeDB()
     {
         if (file_exists(self::$dbFuncCheckKeys)){
-            require self::$dbFuncCheckKeys;
+            require_once self::$dbFuncCheckKeys;
         } else {
             echo "Class DBResult - Ошибка: Отсутствует файл " . self::$dbFuncCheckKeys;
         }
@@ -38,29 +34,39 @@ class DB{
             echo "Class DBResult - Ошибка: Файл " . self::$dbConnPath . " отсутствует или поврежден";
             return false;
         } else {
-            self::$hostname = $dbConnData['hostname'];
-            self::$username = $dbConnData['username'];
-            self::$password = $dbConnData['password'];
-            self::$database = $dbConnData['database'];
+            $dsn = "mysql:dbname=" . $dbConnData['database'] . ";host=" . $dbConnData['hostname'];
+            $user = $dbConnData['username'];
+            $password = $dbConnData['password'];
+            self::$pdo = new PDO($dsn, $user, $password);
+
+            if (!self::$pdo){
+                return false;
+            }
             return true;
         }
     }
 
-    public static function GetList(array $params)
+    private static function SendQuery(string $query)
+    {
+        self::$result = self::$pdo->query($query);
+
+        if (is_bool(self::$result)){
+            echo $query;
+            return self::$pdo->errorInfo();
+        } else {
+            return self::$result;
+        }
+    }
+
+    public static function GetList(array $params, string $fromTable)
     {
         if (!self::AuthorizeDB()){
-            return false;
-        }
-
-        $mysqli = mysqli_connect(self::$hostname, self::$username, self::$password, self::$database);
-
-        if (!$mysqli){
             return false;
         }
         //обязательные
 
         $select = $params['select'];
-        $from = $params['from'];
+        $from = $fromTable;
 
         //необязательные
 
@@ -74,41 +80,76 @@ class DB{
         if ($select == "*") $query = "SELECT " . $select . " FROM `" . $from . "`";
         else $query = "SELECT `" . $select . "` FROM `" . $from . "`";
 
-        if ($where)
-            $query=+" WHERE `" . $where . "`";
-        if ($groupBy)
-            $query=+" GROUP BY `" . $groupBy . "`";
-        if ($having)
-            $query=+" HAVING `" . $having . "`";
-        if ($orderBy)
-            $query=+" ORDER BY `" . $orderBy . "`";
 
-        $query = mysqli_real_escape_string($mysqli, $query);
-        self::$result = mysqli_query($mysqli, $query, $resultMode);
-        return self::$result;
+        if (is_array($where['cond1']) and count($where) > 1){
+            $where = array_unique($where, SORT_REGULAR);
+            $query = $query . " WHERE (";
+            foreach ($where as $cond){
+                $query = $query . "`" . $cond['field'] . "`" . $cond['cond'] . $cond['value'];
+                if ($cond != end($where)){
+                    if (!$cond['nextCond']) $cond['nextCond'] = "AND";
+                    $query = $query . " " . $cond['nextCond'] . " ";
+                } else {
+                    $query = $query . ")";
+                }
+            }
+
+        } else {
+            $query = $query . " WHERE `" . $where['field'] . "` " . $where['cond'] . $where['value'];
+        }
+
+
+        if ($groupBy)
+            $query = $query . " GROUP BY `" . $groupBy . "`";
+        if ($having)
+            $query = $query . " HAVING `" . $having . "`";
+        if ($orderBy)
+            $query = $query . " ORDER BY `" . $orderBy . "`";
+
+        return self::SendQuery($query);
         //return $query;
     }
 
-    public static function Fetch(string $fetch = "all")
+    public static function AddItem(array $params, string $inTable)
     {
-        switch ($fetch){
-            case "all":
-                mysqli_fetch_all(self::$result);
-                break;
-
-            case "array":
-                mysqli_fetch_array(self::$result);
-                break;
-
-            case "assoc":
-                mysqli_fetch_assoc(self::$result);
-                break;
-
-            case "row":
-                mysqli_fetch_row(self::$result);
-                break;
+        if (!self::AuthorizeDB()){
+            return false;
         }
+
+        $needle = [
+            'NAME',
+            'CATEGORY',
+            'DEPTH_LEVEL',
+            'URL',
+        ];
+
+        if (!checkKeysInArr($params, $needle)){
+            return false;
+        }
+
+        foreach ($params as $key => $value){
+            $listKeys[] = "`" . $key . "`";
+
+            if (!$value){
+                return false;
+            }
+
+            if (is_bool($value) and $value){
+                $listVals[] = 1;
+            } elseif (is_bool($value) and !$value){
+                $listVals[] = 0;
+            } elseif (is_numeric($value)){
+                $listVals[] = $value;
+            } else {
+                $listVals[] = "'" . $value . "'";
+            }
+        }
+        $query = "INSERT INTO `" . $inTable . "`(" . implode(", ", $listKeys) . ") VALUES (" . implode(", ", $listVals) . ");";
+
+        return self::SendQuery($query);
+        //return $query;
     }
+
 }
 
 /*

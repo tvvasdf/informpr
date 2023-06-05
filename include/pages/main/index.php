@@ -11,21 +11,38 @@ $new = [
 ];
 
 $update = [
-    'NAME' => 'UPDATD',
-    'URL' => 'UPDTED',
-    'CATEGORY' => 'UDATED',
-    'DEPTH_LEVEL' => '3',
+    'NAME' => 'U D',
+    'URL' => 'UP2 ED',
+    'CATEGORY' => 'UD D',
+    'DEPTH_LEVEL' => '5',
 ];
 
-$getlist = [
-    'SELECT' => '*',
-    'FROM' => 'testTable',
+
+$get = [
+    'select' => '*',
+    'where' => [
+        'field' => 'DEPTH_LEVEL',
+        'cond' => '=',
+        'value' => '3',
+    ],
+
 ];
+
+/*
+$test = DB::AddItem($update, 'testTable');
 
 echo '<pre>';
-var_dump(DB::GetList($getlist));
+var_dump($test);
 echo '</pre>';
+*/
 
+
+$test = DB::GetList($get, 'testTable');
+
+echo '<pre>';
+var_dump($test);
+var_dump($test->fetchAll());
+echo '</pre>';
 
 
 
