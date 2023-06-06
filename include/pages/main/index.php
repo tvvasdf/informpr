@@ -1,7 +1,15 @@
 <?php
 
-include SITE_DIR . 'class/DBClass.php';
+$test = new Main;
 
+
+
+echo '<pre>';
+var_dump($test->IncludeComp('menu', '', ['PARAM1' => 1, 'PARAM2' => 2]));
+echo '</pre>';
+
+
+/*
 $new = [
     'ID' => '5',
     'NAME' => 'TEST',
@@ -45,7 +53,7 @@ $test = DB::AddItem($update, 'testTable');
 echo '<pre>';
 var_dump($test);
 echo '</pre>';
-*/
+
 
 $test = DB::DeleteItem($delete,'testTable', $needle);
 echo '<pre>';

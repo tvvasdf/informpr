@@ -1,4 +1,5 @@
 <?php if (!defined('INIT_INCLUDED')) exit; ?>
+
                 </div> <!-- end of column two -->
             <div class="cleaner">&nbsp;</div>
         </div> <!-- end of content -->

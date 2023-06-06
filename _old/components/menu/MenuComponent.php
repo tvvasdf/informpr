@@ -2,8 +2,8 @@
 
 class Menu{
 
-    private string $menuFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
-    private string $pathToMenuTypes = SITE_DIR . 'components_data/menu/menu_types.json';
+    private string $menuFuncCheckKeys = SITE_DIR . "/func/checkKeysInArr.php";
+    private string $pathToMenuTypes = SITE_DIR . '/components_data/menu/menu_types.json';
     private array $needleKeys = [
         'ID',
         'NAME',
@@ -21,7 +21,7 @@ class Menu{
             $arMenuTypes = json_decode($file, true);
             if (in_array($menuComponent, $arMenuTypes)){
                 $this->menuComponent = $menuComponent;
-                $this->filePath = SITE_DIR . 'components_data/menu/' . $menuComponent .'/data.json';
+                $this->filePath = SITE_DIR . '/components_data/menu/' . $menuComponent .'/data.json';
             } else {
                 echo 'Class Menu - Такого типа меню не существует!';
             }

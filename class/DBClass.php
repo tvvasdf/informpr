@@ -3,8 +3,8 @@ class DB{
 
     private static $pdo;
 
-    private static string $dbConnPath = SITE_DIR . "init/dbconn.php";
-    private static string $dbFuncCheckKeys = SITE_DIR . "func/checkKeysInArr.php";
+    private static string $dbConnPath = SITE_DIR . "/init/include/dbconn.php";
+    private static string $dbFuncCheckKeys = SITE_DIR . "/func/checkKeysInArr.php";
 
     //PDOStatement or bool
     public static $result;
