@@ -31,7 +31,7 @@ class DB{
         ];
 
         if (!$dbConnData or !checkKeysInArr($dbConnData, $needleKeys)){
-            echo "Class DBResult - Ошибка: Файл " . self::$dbConnPath . " отсутствует или поврежден";
+            trigger_error("Class DBResult - Ошибка: Файл " . self::$dbConnPath . " отсутствует или поврежден");
             return false;
         } else {
             $dsn = "mysql:dbname=" . $dbConnData['database'] . ";host=" . $dbConnData['hostname'];
@@ -40,6 +40,7 @@ class DB{
             self::$pdo = new PDO($dsn, $user, $password);
 
             if (!self::$pdo){
+                trigger_error(implode(",", self::$pdo->errorInfo()));
                 return false;
             }
             return true;
@@ -186,6 +187,11 @@ class DB{
         }
 
         return self::SendQuery($query);
+    }
+
+    public static function GetError()
+    {
+
     }
 
 }
