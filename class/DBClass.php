@@ -31,8 +31,7 @@ class DB{
         ];
 
         if (!$dbConnData or !checkKeysInArr($dbConnData, $needleKeys)){
-            trigger_error("Class DBResult - Ошибка: Файл " . self::$dbConnPath . " отсутствует или поврежден");
-            return false;
+            throw new Exception("Class DBResult - Ошибка: Файл " . self::$dbConnPath . " отсутствует или поврежден");
         } else {
             $dsn = "mysql:dbname=" . $dbConnData['database'] . ";host=" . $dbConnData['hostname'];
             $user = $dbConnData['username'];
@@ -40,8 +39,7 @@ class DB{
             self::$pdo = new PDO($dsn, $user, $password);
 
             if (!self::$pdo){
-                trigger_error(implode(",", self::$pdo->errorInfo()));
-                return false;
+                throw new Exception(implode(",", self::$pdo->errorInfo()));
             }
             return true;
         }
@@ -61,8 +59,10 @@ class DB{
 
     public static function GetList(array $params, string $fromTable)
     {
-        if (!self::AuthorizeDB()){
-            return false;
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            return $e->getMessage();
         }
         //обязательные
 
@@ -111,8 +111,10 @@ class DB{
 
     public static function AddItem(array $params, string $fromTable, array $needle)
     {
-        if (!self::AuthorizeDB() or !checkKeysInArr($params, $needle)){
-            return false;
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            return $e->getMessage();
         }
 
         foreach ($params as $key => $value){
@@ -140,8 +142,10 @@ class DB{
 
     public static function DeleteItem(array $params, string $fromTable, array $needle = ["where"])
     {
-        if (!self::AuthorizeDB() or !checkKeysInArr($params, $needle)){
-            return false;
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            return $e->getMessage();
         }
         //обязательные
         $where = $params['where'];
@@ -173,9 +177,15 @@ class DB{
 
     public static function UpdateItem(array $params, string $fromTable, array $needle = ["update", "where"])
     {
-        if (!self::AuthorizeDB() or !checkKeysInArr($params, $needle)){
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            return $e->getMessage();
+        }
+        if (!checkKeysInArr($params, $needle)){
             return false;
         }
+
         $query = "UPDATE `" . $fromTable . "` SET ";
         $update = $params['update'];
         $where = $params['where'];
@@ -187,11 +197,6 @@ class DB{
         }
 
         return self::SendQuery($query);
-    }
-
-    public static function GetError()
-    {
-
     }
 
 }

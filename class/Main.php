@@ -2,10 +2,8 @@
 
 class Main
 {
-
-    public function IncludeComp(string $componentName, string $componentTemplate = "default", array $arParams = [], bool $isCustom = false)
+    private function IncludeCompModel(string $componentName, string $componentTemplate = "default", array $arParams = [], bool $isCustom = false)
     {
-
         if (!$isCustom){
             $pathComp = SITE_DIR . "/components/" . $componentName . "/component.php";
             if ($componentTemplate == "default" or !$componentTemplate){
@@ -18,12 +16,22 @@ class Main
             $pathComp = TEMPLATE_DIR . "/components/" . $componentName . "/" . $componentTemplate . "/component.php";
         }
 
-        if (include $pathComp){
+        if (file_exists($pathComp) && include $pathComp){
             return true;
         }
         else {
-            return "Запрашиваемый компонент " . $componentName . " не найден.<br>Путь: " . $pathComp;
+            throw new Exception("Запрашиваемый компонент " . $componentName . " не найден.");
         }
 
+    }
+
+    public function IncludeComponent(string $componentName, string $componentTemplate = "default", array $arParams = [], bool $isCustom = false)
+    {
+        try {
+            $result = self::IncludeCompModel($componentName, $componentTemplate, $arParams, $isCustom);
+        } catch(Exception $e) {
+            return "Ошибка: " . $e->getMessage();
+        }
+        return $result;
     }
 }

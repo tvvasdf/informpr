@@ -2,19 +2,13 @@
 
 $test = new Main;
 
-
-$testExc = new Exception('Test');
-
-echo '<pre>';
-var_dump($testExc->getMessage());
-echo '</pre>';
-
-throw $testExc;
-//trigger_error("Не могу поделить на ноль");
-
-echo '<pre>';
-var_dump($test->IncludeComp('menu', '', ['PARAM1' => 1, 'PARAM2' => 2]));
-echo '</pre>';
+$test->IncludeComponent(
+    'menu',
+    '',
+    [
+        'PARAM1' => 1,
+        'PARAM2' => 2
+    ]);
 
 
 /*
