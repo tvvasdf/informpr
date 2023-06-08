@@ -2,6 +2,7 @@
 class DB{
 
     private static $pdo;
+    private static string $dbName;
 
     private static string $dbConnPath = SITE_DIR . "/init/include/dbconn.php";
     private static string $dbFuncCheckKeys = SITE_DIR . "/func/checkKeysInArr.php";
@@ -14,13 +15,13 @@ class DB{
         if (file_exists(self::$dbFuncCheckKeys)){
             require_once self::$dbFuncCheckKeys;
         } else {
-            echo "Class DBResult - Ошибка: Отсутствует файл " . self::$dbFuncCheckKeys;
+            throw new Exception("Class DBResult - Ошибка: Отсутствует файл " . self::$dbFuncCheckKeys);
         }
 
         if (file_exists(self::$dbConnPath)){
             require self::$dbConnPath;
         } else {
-            echo "Class DBResult - Ошибка: Отсутствует файл " . self::$dbConnPath;
+            throw new Exception("Class DBResult - Ошибка: Отсутствует файл " . self::$dbConnPath);
         }
 
         $needleKeys = [
@@ -41,6 +42,7 @@ class DB{
             if (!self::$pdo){
                 throw new Exception(implode(",", self::$pdo->errorInfo()));
             }
+            self::$dbName = $dbConnData['database'];
             return true;
         }
     }
@@ -50,8 +52,7 @@ class DB{
         self::$result = self::$pdo->query($query);
 
         if (is_bool(self::$result)){
-            echo $query;
-            return self::$pdo->errorInfo();
+            throw new Exception("Ошибка: " . implode("; ", self::$pdo->errorInfo()) . "<br>Запрос: " . $query);
         } else {
             return self::$result;
         }
@@ -62,7 +63,7 @@ class DB{
         try {
             self::AuthorizeDB();
         } catch(Exception $e) {
-            return $e->getMessage();
+            echo $e->getMessage();
         }
         //обязательные
 
@@ -93,7 +94,7 @@ class DB{
                 }
             }
 
-        } else {
+        } elseif ($where) {
             $query = $query . " WHERE `" . $where['field'] . "` " . $where['cond'] . $where['value'];
         }
 
@@ -105,8 +106,11 @@ class DB{
         if ($orderBy)
             $query = $query . " ORDER BY `" . $orderBy . "`";
 
-        return self::SendQuery($query);
-        //return $query;
+        try {
+            return self::SendQuery($query);
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
     }
 
     public static function AddItem(array $params, string $fromTable, array $needle)
@@ -114,7 +118,10 @@ class DB{
         try {
             self::AuthorizeDB();
         } catch(Exception $e) {
-            return $e->getMessage();
+            echo $e->getMessage();
+        }
+        if (!checkKeysInArr($params, $needle)){
+            return false;
         }
 
         foreach ($params as $key => $value){
@@ -136,8 +143,11 @@ class DB{
         }
         $query = "INSERT INTO `" . $fromTable . "`(" . implode(", ", $listKeys) . ") VALUES (" . implode(", ", $listVals) . ");";
 
-        return self::SendQuery($query);
-        //return $query;
+        try {
+            return self::SendQuery($query);
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
     }
 
     public static function DeleteItem(array $params, string $fromTable, array $needle = ["where"])
@@ -145,7 +155,10 @@ class DB{
         try {
             self::AuthorizeDB();
         } catch(Exception $e) {
-            return $e->getMessage();
+            echo $e->getMessage();
+        }
+        if (!checkKeysInArr($params, $needle)){
+            return false;
         }
         //обязательные
         $where = $params['where'];
@@ -171,8 +184,11 @@ class DB{
             return false;
         }
 
-        return self::SendQuery($query);
-        //return $query;
+        try {
+            return self::SendQuery($query);
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
     }
 
     public static function UpdateItem(array $params, string $fromTable, array $needle = ["update", "where"])
@@ -180,7 +196,7 @@ class DB{
         try {
             self::AuthorizeDB();
         } catch(Exception $e) {
-            return $e->getMessage();
+            echo $e->getMessage();
         }
         if (!checkKeysInArr($params, $needle)){
             return false;
@@ -196,7 +212,122 @@ class DB{
             }
         }
 
-        return self::SendQuery($query);
+        try {
+            return self::SendQuery($query);
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
+    }
+
+    public static function CreateTable(array $params, array $needle = ["table_name", "rows"])
+    {
+        /**
+         *        $params = [
+         *            'table_name' => "name",
+         *            'rows' => [
+         *                0 => [
+         *                    'name' => "rowName",
+         *                    'type' => "INT",
+         *                    'attributes' => [
+         *                        0 => "NOT_NULL",
+         *                        1 => "NOT_NULL",
+         *                        ]
+         *                    ]
+         *                ],
+         *            'table_attributes' => [
+         *                0 => 'ATTR',
+         *                1 => 'ATTR',
+         *                ],
+         *            ];
+         **/
+
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            echo $e->getMessage();
+        }
+        if (!checkKeysInArr($params, $needle)){
+            return false;
+        }
+
+        $query = "CREATE TABLE `" . $params['table_name'] . "` (";
+
+        if (is_array($params['rows']) and !$params['rows']['name']){
+            foreach ($params['rows'] as $key => $row){
+                if (is_array($params['rows'][$key]['attributes'])){
+                    $params['rows'][$key]['attributes'] = implode (" ",$row['attributes']);
+                    $params['rows'][$key]['name'] = '`' . $row['name'] . '`';
+                }
+                $params['rows'][$key] = implode (" ", $params['rows'][$key]);
+            }
+            $query = $query . implode (", ", $params['rows']);
+        } else {
+            $query = $query . '`' . $params['rows']['name'] . '` ' . $params['rows']['type'];
+            if (is_array($params['rows']['attributes'])){
+                $query = $query . ' ' . implode (" ", $params['rows']['attributes']);
+            } else {
+                $query = $query . ' ' . $params['rows']['attributes'];
+            }
+        }
+
+        if (is_array($params['table_attributes'])){
+            $query = $query . ", " . implode (" ", $params['table_attributes']) . ");";
+        } else {
+            if ($params['table_attributes']){
+                $query = $query . ", " . $params['table_attributes'] . ");";
+            } else {
+                $query = $query . ");";
+            }
+
+        }
+
+        try {
+            return self::SendQuery($query);
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
+    }
+
+    public static function DeleteTable($tableName, $ifExists = true)
+    {
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            echo $e->getMessage();
+        }
+
+        $query = "DROP TABLE ";
+        if ($ifExists){
+            $query = $query . "IF EXISTS ";
+        }
+
+        if (is_array($tableName)){
+            $query = $query . "`" . implode("`, `", $tableName) . "`;";
+        } else {
+            $query = $query . "`" .$tableName . "`;";
+        }
+
+        try {
+            return self::SendQuery($query);
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
+    }
+
+    public static function ShowTables(string $tableName = "")
+    {
+        try {
+            self::AuthorizeDB();
+        } catch(Exception $e) {
+            echo $e->getMessage();
+        }
+        $query = "SHOW TABLES FROM " . self::$dbName . " LIKE '" . $tableName . "';";
+
+        try {
+            return self::SendQuery($query)->rowCount();
+        } catch (Exception $e){
+            echo $e->getMessage();
+        }
     }
 
 }

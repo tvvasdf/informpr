@@ -6,21 +6,15 @@ class Main
     {
         if (!$isCustom){
             $pathComp = SITE_DIR . "/components/" . $componentName . "/component.php";
-            if ($componentTemplate == "default" or !$componentTemplate){
-                $pathTempl = SITE_DIR . "/components/" . $componentName . "/template.php";
-            } else {
-                $pathComp = TEMPLATE_DIR . "/components/" . $componentName . "/" . $componentTemplate . "/component.php";
-            }
         } else {
-            $pathTempl = SITE_DIR . "/components/" . $componentName . "/template.php";
-            $pathComp = TEMPLATE_DIR . "/components/" . $componentName . "/" . $componentTemplate . "/component.php";
+            $pathComp = TEMPLATE_DIR . "/components/" . $componentName . "/component.php";
         }
 
         if (file_exists($pathComp) && include $pathComp){
             return true;
         }
         else {
-            throw new Exception("Запрашиваемый компонент " . $componentName . " не найден.");
+            throw new Exception('Запрашиваемый компонент "' . $componentName . '" не найден.');
         }
 
     }
@@ -30,7 +24,7 @@ class Main
         try {
             $result = self::IncludeCompModel($componentName, $componentTemplate, $arParams, $isCustom);
         } catch(Exception $e) {
-            return "Ошибка: " . $e->getMessage();
+            echo "Ошибка: " . $e->getMessage();
         }
         return $result;
     }
