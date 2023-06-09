@@ -1,4 +1,6 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . "/init/init.php";
+
 /**
  * $_POST[
  *    'menu-type' string - Тип меню
@@ -13,15 +15,19 @@ if ($_POST['ACTION'] == "add"){
      * $fromTable string - Название таблицы в базе данных
      * $needle array - Массив ключей, которые должны присутствовать в массиве $params
      **/
-    $needle = ["DEPTH_LEVEL", "CATEGORY", "NAME", "URL"];
+    $needle = ["DEPTH_LEVEL", "NAME", "URL"];
     $postGetData = $_POST;
 
-    if (!$postGetData['NAME'] or !$postGetData['CATEGORY'] or !$postGetData['URL'] or !$postGetData['MENU_TYPE']){
+    if (!$postGetData['NAME'] or !$postGetData['URL'] or !$postGetData['MENU_TYPE']){
         throw new Exception("Ошибка: Заполнены не все обязательные поля");
     }
 
     if (!$postGetData['DEPTH_LEVEL']){
         $postGetData['DEPTH_LEVEL'] = 1;
+    }
+
+    if (!$postGetData['CATEGORY']){
+        $postGetData['CATEGORY'] = "DEFAULT";
     }
 
     if (!$postGetData['PARENT_ID']){
@@ -36,13 +42,7 @@ if ($_POST['ACTION'] == "add"){
     ];
     $fromTable = "menu-" . $postGetData['MENU_TYPE'];
 
-    echo '<pre>';
-    var_dump($params);
-    echo '</pre>';
-    echo '<pre>';
-    var_dump($fromTable);
-    echo '</pre>';
-    //DB::AddItem($params, $fromTable, $needle);
+    DB::AddItem($params, $fromTable, $needle);
 }
 
 if ($_POST['ACTION'] == "delete"){

@@ -24,11 +24,9 @@ if (!$arParams['MENU_TYPE']){
                 echo $result;
             } else {
                 $arResult = $result->fetchAll(PDO::FETCH_ASSOC);
-                include_once $pathTempl;
+                include $pathTempl;
             }
         }
     }
-/*
 
-}
 

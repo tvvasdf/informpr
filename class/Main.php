@@ -2,6 +2,10 @@
 
 class Main
 {
+
+    private array $pageTitle = [];
+    private string $pageTitleDefault;
+
     private function IncludeCompModel(string $componentName, string $componentTemplate = "default", array $arParams = [], bool $isCustom = false)
     {
         if (!$isCustom){
@@ -27,5 +31,24 @@ class Main
             echo "Ошибка: " . $e->getMessage();
         }
         return $result;
+    }
+
+    public function SetTitle(string $title, string $property = "")
+    {
+
+        if (!$property){
+            $property = "default";
+        }
+        $this->pageTitle[$property] = $title;
+
+    }
+
+    public function ShowTitle(string $property = "")
+    {
+        if (!$property){
+            $property = "default";
+        }
+        echo $this->pageTitle[$property];
+
     }
 }

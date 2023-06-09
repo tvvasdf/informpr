@@ -1,7 +1,5 @@
 <?php
-
-$test = new Main;
-
+if (!defined('INIT_INCLUDED')) exit;
 /*
 $test->IncludeComponent(
     'menu',
