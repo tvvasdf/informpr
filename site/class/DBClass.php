@@ -4,8 +4,8 @@ class DB{
     private static $pdo;
     private static string $dbName;
 
-    private static string $dbConnPath = SITE_DIR . "/init/include/dbconn.php";
-    private static string $dbFuncCheckKeys = SITE_DIR . "/func/checkKeysInArr.php";
+    private static string $dbConnPath = SITE_DIR . "/" . SITE_SYSTEM_NAME . "/include/dbconn.php";
+    private static string $dbFuncCheckKeys = SITE_DIR . "/" . SITE_SYSTEM_NAME . "/func/checkKeysInArr.php";
 
     //PDOStatement or bool
     public static $result;
@@ -146,7 +146,7 @@ class DB{
         try {
             return self::SendQuery($query);
         } catch (Exception $e){
-            echo $e->getMessage();
+            return $e->getMessage();
         }
     }
 

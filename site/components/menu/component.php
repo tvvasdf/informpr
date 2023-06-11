@@ -9,13 +9,15 @@ if (!$arParams['MENU_TYPE']){
         ];
 
         if ($componentTemplate == "default" or !$componentTemplate){
-            $pathTempl = SITE_DIR . "/components/" . $componentName . "/template.php";
+            $pathTempl = SITE_DIR . "/" . SITE_SYSTEM_NAME . "/components/" . $componentName . "/template.php";
+            $pathResModifier = SITE_DIR . "/" . SITE_SYSTEM_NAME . "/components/" . $componentName . "/result_modifier.php";
         } else {
             $pathTempl = TEMPLATE_DIR . "/components/" . $componentName . "/" . $componentTemplate . "/template.php";
+            $pathResModifier = TEMPLATE_DIR . "/components/" . $componentName . "/" . $componentTemplate . "/result_modifier.php";
         }
 
         if (!file_exists($pathTempl)){
-            echo 'Ошибка: Запрашиваемый шаблон "' . $componentTemplate . '" компонента "' . $componentName . '" не найден.';
+            echo 'Ошибка: Запрашиваемый шаблон "' . $componentTemplate . '" компонента "' . $componentName . '" не найден.' . $pathTempl;
         } else {
 
             $result = DB::GetList($params, $from);
@@ -24,6 +26,9 @@ if (!$arParams['MENU_TYPE']){
                 echo $result;
             } else {
                 $arResult = $result->fetchAll(PDO::FETCH_ASSOC);
+                if (file_exists($pathResModifier)) {
+                    include $pathResModifier;
+                }
                 include $pathTempl;
             }
         }

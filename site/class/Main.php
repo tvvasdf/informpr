@@ -5,11 +5,12 @@ class Main
 
     private array $pageTitle = [];
     private string $pageTitleDefault;
+    private $obOut;
 
     private function IncludeCompModel(string $componentName, string $componentTemplate = "default", array $arParams = [], bool $isCustom = false)
     {
         if (!$isCustom){
-            $pathComp = SITE_DIR . "/components/" . $componentName . "/component.php";
+            $pathComp = SITE_DIR . "/" . SITE_SYSTEM_NAME . "/components/" . $componentName . "/component.php";
         } else {
             $pathComp = TEMPLATE_DIR . "/components/" . $componentName . "/component.php";
         }
@@ -33,22 +34,15 @@ class Main
         return $result;
     }
 
-    public function SetTitle(string $title, string $property = "")
-    {
-
-        if (!$property){
-            $property = "default";
-        }
-        $this->pageTitle[$property] = $title;
-
+    public function SetTitle(string $title, string $property = ""){
+       if (!$property){
+           $property = 'title';
+       }
+       $this->pageTitle[$property] = $title;
     }
 
     public function ShowTitle(string $property = "")
     {
-        if (!$property){
-            $property = "default";
-        }
-        echo $this->pageTitle[$property];
-
+        
     }
 }

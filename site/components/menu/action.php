@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . "/init/init.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/" . SITE_SYSTEM_NAME . "/init.php";
 
 /**
  * $_POST[
@@ -19,7 +19,10 @@ if ($_POST['ACTION'] == "add"){
     $postGetData = $_POST;
 
     if (!$postGetData['NAME'] or !$postGetData['URL'] or !$postGetData['MENU_TYPE']){
-        throw new Exception("Ошибка: Заполнены не все обязательные поля");
+        echo json_encode([
+            "success" => false,
+            "message" => "Ошибка: Заполнены не все обязательные поля"
+        ], JSON_UNESCAPED_UNICODE);
     }
 
     if (!$postGetData['DEPTH_LEVEL']){
@@ -42,7 +45,19 @@ if ($_POST['ACTION'] == "add"){
     ];
     $fromTable = "menu-" . $postGetData['MENU_TYPE'];
 
-    DB::AddItem($params, $fromTable, $needle);
+    try {
+        DB::AddItem($params, $fromTable, $needle);
+        echo json_encode([
+            "success" => true,
+        ]);
+    } catch (Exception $e){
+        echo json_encode([
+            "success" => false,
+            "message" => $e->getMessage(),
+        ], JSON_UNESCAPED_UNICODE);
+    }
+
+
 }
 
 if ($_POST['ACTION'] == "delete"){
