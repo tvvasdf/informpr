@@ -30,7 +30,7 @@ if ($_POST['ACTION'] == "add"){
     }
 
     if (!$postGetData['CATEGORY']){
-        $postGetData['CATEGORY'] = "DEFAULT";
+        $postGetData['CATEGORY'] = NULL;
     }
 
     if (!$postGetData['PARENT_ID']){
@@ -98,7 +98,6 @@ if ($_POST['ACTION'] == "add-menu-type" and $_POST['MENU_TYPE']){
                 3 => [
                     'name' => 'CATEGORY',
                     'type' => 'VARCHAR(255)',
-                    'attributes' => 'NOT NULL',
                 ],
 
                 4 => [

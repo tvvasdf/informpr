@@ -25,7 +25,7 @@ if (!$arParams['MENU_TYPE']){
             if (is_string($result)){
                 echo $result;
             } else {
-                $arResult = $result->fetchAll(PDO::FETCH_ASSOC);
+                $arResult['ITEMS'] = $result->fetchAll(PDO::FETCH_ASSOC);
                 if (file_exists($pathResModifier)) {
                     include $pathResModifier;
                 }
@@ -33,5 +33,6 @@ if (!$arParams['MENU_TYPE']){
             }
         }
     }
+
 
 
